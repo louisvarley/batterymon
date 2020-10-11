@@ -16,12 +16,13 @@ import configparser
 ######################################
 
 config = configparser.ConfigParser()
-config['SPI'] = {'CLK': 11,'MISO': 9,'MOSI': 10, 'CS': 8}
-config['GENERAL'] = {'ADC_TO_VOLTAGE_DIVIDE': 1.961,'VOLTAGE_FULL': 4.07,'VOLTAGE_CRITICAL': 2.70}
 
-with open('batterymon.ini', 'w') as configfile:
-    config.write(configfile)
-    
+with open("/home/pi/batterymon/batterymon.ini", 'r') as file:
+    config_data = file.read()
+
+config.read_string(config_data)
+
+
 mcp = Adafruit_MCP3008.MCP3008(clk=int(config['SPI']['CLK']), cs=int(config['SPI']['CS']), miso=int(config['SPI']['MISO']), mosi=int(config['SPI']['MOSI']))
 
 class pngviewer(object):
@@ -67,7 +68,7 @@ def get_voltage():
 def adc_to_voltage(adc):
     return round((adc / float(config['GENERAL']['ADC_TO_VOLTAGE_DIVIDE'])) / 100,2)
 
-def get_average_voltage(checks = 5, sleep = 0.1):
+def get_average_voltage(checks = 2, sleep = 1):
 
     voltages = []
 
@@ -121,12 +122,12 @@ def main():
                 log("Battery Is at " + str(percentage) + "%")
                 log("Voltage Is at " + str(get_voltage()) + "v")                
                 
-                if(get_voltage() > float(config['GENERAL']['VOLTAGE_FULL'])):
-                    icon.set("charging.png", 32, 10, 0)
+                if(get_voltage() > float(config['GENERAL']['VOLTAGE_FULL']) or percentage > 100):
+                    icon.set("charging", 32, 10, 0)
                     log("Battery charging") 
                     
                 elif(get_voltage() <= float(config['GENERAL']['VOLTAGE_CRITICAL'])):
-                    icon.set("critical.png", 32, 10, 0)
+                    icon.set("critical", 32, 10, 0)
                     log("Battery Critical, shutdown in 10 seconds...") 
                     time.sleep(10)
                     os.system('shutdown -tf 0')
