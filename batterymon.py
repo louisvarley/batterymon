@@ -111,18 +111,29 @@ def main():
 
     try:
         log("BatteryMon Started...")
+        log("Full Battery At " + config['GENERAL']['VOLTAGE_FULL'])
+        log("Critical Battery At " + config['GENERAL']['VOLTAGE_CRITICAL'])
         percentage = 0
         while True:
             now_percentage = get_battery_percentage()
             if(now_percentage != percentage):
                 percentage = now_percentage
-                icon.set(roundup(percentage), 32, 10, 0)
                 log("Battery Is at " + str(percentage) + "%")
-                log("Voltage Is at " + str(get_voltage()) + "v")
-               
-            if(get_voltage() <= float(config['GENERAL']['VOLTAGE_CRITICAL'])):
-                os.system('shutdown -tf 0')
-               
+                log("Voltage Is at " + str(get_voltage()) + "v")                
+                
+                if(get_voltage() > float(config['GENERAL']['VOLTAGE_FULL'])):
+                    icon.set("charging.png", 32, 10, 0)
+                    log("Battery charging") 
+                    
+                elif(get_voltage() <= float(config['GENERAL']['VOLTAGE_CRITICAL'])):
+                    icon.set("critical.png", 32, 10, 0)
+                    log("Battery Critical, shutdown in 10 seconds...") 
+                    time.sleep(10)
+                    os.system('shutdown -tf 0')
+                else:
+                    icon.set(roundup(percentage), 32, 10, 0)
+
+
     finally:
         log("BatteryMon Stopping...")
         os.system('killall /f /im pngview')
