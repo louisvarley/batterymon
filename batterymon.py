@@ -2,6 +2,7 @@
 
 import time
 import Adafruit_GPIO.SPI as SPI
+import datetime
 import Adafruit_MCP3008
 import math
 import time
@@ -66,7 +67,7 @@ def get_voltage():
 def adc_to_voltage(adc):
     return round((adc / float(config['GENERAL']['ADC_TO_VOLTAGE_DIVIDE'])) / 100,2)
 
-def get_average_voltage(checks = 5, sleep = 2):
+def get_average_voltage(checks = 5, sleep = 0.1):
 
     voltages = []
 
@@ -86,6 +87,21 @@ def roundup(x, n=10):
         res-=n
     return res
    
+def log(logln):
+    logFile = "/home/pi/batterymon/batterymon.log"
+    f = open(logFile, "a") 
+    count = len(open(logFile).readlines(  ))
+    
+    # Keeps Log at 300 Lines
+    if(count > 300):
+        with open(logFile, 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open(logFile, 'w') as fout:
+            fout.writelines(data[1:])
+    
+    print(str(logln))
+    f.write(str(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")) + ":" + str(logln) + "\r\n")
+    f.close()    
    
 ### Generic Vars defined
 icon = pngviewer()
@@ -94,16 +110,22 @@ icon.set("0", 32, 10, 0)
 def main():
 
     try:
+        log("BatteryMon Started...")
         percentage = 0
         while True:
-           now_percentage = roundup(get_battery_percentage())
-           if(now_percentage != percentage):
-               percentage = now_percentage
-               icon.set(percentage, 32, 10, 0)
-               print("Battery Is Now at " + str(percentage))
+            now_percentage = get_battery_percentage()
+            if(now_percentage != percentage):
+                percentage = now_percentage
+                icon.set(roundup(percentage), 32, 10, 0)
+                log("Battery Is at " + str(percentage) + "%")
+                log("Voltage Is at " + str(get_voltage()) + "v")
+               
+            if(get_voltage() <= float(config['GENERAL']['VOLTAGE_CRITICAL'])):
+                os.system('shutdown -tf 0')
                
     finally:
-        os.system('taskkill /f /im pngview')
+        log("BatteryMon Stopping...")
+        os.system('killall /f /im pngview')
 
 if __name__=='__main__':
     main()    
