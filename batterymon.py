@@ -82,19 +82,16 @@ def get_battery_percentage():
 
     #Average Voltage
     a = Decimal(get_average_voltage())
-    print("A " + str(a))
     
     #Critcal Voltage minus Average Voltage
     b = Decimal(Decimal(a) - Decimal(config['GENERAL']['VOLTAGE_CRITICAL']))
-    print("B " + str(b))
     
     #Difference Between Full and Empty / 100
     c = Decimal((Decimal(config['GENERAL']['VOLTAGE_FULL']) - Decimal(config['GENERAL']['VOLTAGE_CRITICAL'])) / 100)
-    print("C " + str(c))
-    
+  
+    # B / C
     d = Decimal(b / c)
-    print("D " + str(d))
-
+  
     return round(d,0)
    
 def roundup(x, n=10):
