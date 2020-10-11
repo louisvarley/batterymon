@@ -39,26 +39,21 @@ class pngviewer(object):
         self.__x = str(x) 
         self.__pngview_path = "/usr/local/bin/pngview"
         self.__pngview_call = [self.__pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", self.__y, "-x", self.__x]       
-        self.__fbfile="tvservice -s"
-        self.__resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(self.__fbfile.split()).decode().rstrip()).group().split('x')  
+        #self.__fbfile="tvservice -s"
+        #self.__resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(self.__fbfile.split()).decode().rstrip()).group().split('x')  
         self.__overlay_process = None
         self.show()
     
     def show(self):        
-        if(self.visible == True):
-            self.hide();
-            time.sleep(0.1)
+        self.hide();
+        time.sleep(0.1)
         self.__overlay_process_cmd = self.__pngview_call + [self.__icon]
         self.__overlay_process = subprocess.Popen(self.__overlay_process_cmd) 
         start = time.time()
-        self.visible = True
-
 
     def hide(self):
-        if(self.__overlay_process != None):
-            self.__overlay_process.kill()  
-            os.system('killall /f /im pngview')
-            self.visible = False
+        os.system('killall /f /im pngview')
+
 
 def get_adc():
     return mcp.read_adc_difference(0)
