@@ -57,6 +57,7 @@ class pngviewer(object):
     def hide(self):
         if(self.__overlay_process != None):
             self.__overlay_process.kill()  
+            os.system('killall /f /im pngview')
             self.visible = False
 
 def get_adc():
