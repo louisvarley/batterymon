@@ -23,6 +23,7 @@ with open("/home/pi/batterymon/batterymon.ini", 'r') as file:
 config.read_string(config_data)
 
 
+
 mcp = Adafruit_MCP3008.MCP3008(clk=int(config['SPI']['CLK']), cs=int(config['SPI']['CS']), miso=int(config['SPI']['MISO']), mosi=int(config['SPI']['MOSI']))
 
 class pngviewer(object):
@@ -39,8 +40,8 @@ class pngviewer(object):
         self.__x = str(x) 
         self.__pngview_path = "/usr/local/bin/pngview"
         self.__pngview_call = [self.__pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", self.__y, "-x", self.__x]       
-        #self.__fbfile="tvservice -s"
-        #self.__resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(self.__fbfile.split()).decode().rstrip()).group().split('x')  
+        self.__fbfile="tvservice -s"
+        self.__resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(self.__fbfile.split()).decode().rstrip()).group().split('x')  
         self.__overlay_process = None
         self.show()
     
@@ -52,7 +53,7 @@ class pngviewer(object):
         start = time.time()
 
     def hide(self):
-        os.system('killall /f /im pngview')
+        os.system('killall pngview')
 
 
 def get_adc():
@@ -117,7 +118,6 @@ def main():
                 percentage = now_percentage
                 log("Battery Is at " + str(percentage) + "%")
                 log("Voltage Is at " + str(get_voltage()) + "v")                
-                
                 if(get_voltage() > float(config['GENERAL']['VOLTAGE_FULL']) or percentage > 100):
                     icon.set("charging", 32, 10, 0)
                     log("Battery charging") 
@@ -133,7 +133,7 @@ def main():
 
     finally:
         log("BatteryMon Stopping...")
-        os.system('killall /f /im pngview')
+        os.system('killall pngview')
 
 if __name__=='__main__':
     main()    
