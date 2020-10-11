@@ -10,6 +10,7 @@ import subprocess
 import os
 import re
 import configparser
+from decimal import *
 
 ######################################
 #CONFIG LOADER
@@ -63,7 +64,8 @@ def get_voltage():
     return adc_to_voltage(get_adc())
 
 def adc_to_voltage(adc):
-    return round((adc / float(config['GENERAL']['ADC_TO_VOLTAGE_DIVIDE'])) / 100,2)
+    d = Decimal(config['GENERAL']['ADC_TO_VOLTAGE_DIVIDE'])
+    return round((adc / d) / 100,2)
 
 def get_average_voltage(checks = 2, sleep = 1):
 
@@ -77,7 +79,23 @@ def get_average_voltage(checks = 2, sleep = 1):
     
     
 def get_battery_percentage():    
-   return round(get_average_voltage() / (float(config['GENERAL']['VOLTAGE_FULL']) / 100),0)
+
+    #Average Voltage
+    a = Decimal(get_average_voltage())
+    print("A " + str(a))
+    
+    #Critcal Voltage minus Average Voltage
+    b = Decimal(Decimal(a) - Decimal(config['GENERAL']['VOLTAGE_CRITICAL']))
+    print("B " + str(b))
+    
+    #Difference Between Full and Empty / 100
+    c = Decimal((Decimal(config['GENERAL']['VOLTAGE_FULL']) - Decimal(config['GENERAL']['VOLTAGE_CRITICAL'])) / 100)
+    print("C " + str(c))
+    
+    d = Decimal(b / c)
+    print("D " + str(d))
+
+    return round(d,0)
    
 def roundup(x, n=10):
     res = math.ceil(x/n)*n
